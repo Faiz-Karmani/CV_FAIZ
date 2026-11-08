@@ -157,7 +157,7 @@ async function pdf(k){if(!window.jspdf||!window.html2canvas){msg('Pustaka PDF be
 const prev=K;K=k;draw();msg('Membuat PDF...');await document.fonts.ready;
 const x=document.createElement('div');x.style.cssText='position:absolute;left:0;top:0;width:794px;z-index:-1;pointer-events:none';x.innerHTML='<style>.sheet{margin:0!important}</style>';x.appendChild($('.doc').cloneNode(true));document.body.appendChild(x);
 try{const P=new jspdf.jsPDF({unit:'mm',format:'a4'}),sh=x.querySelectorAll('.sheet');
-for(let i=0;i<sh.length;i++){const c=await html2canvas(sh[i],{scale:2,useCORS:true,backgroundColor:'#ffffff'});if(i)P.addPage();P.addImage(c.toDataURL('image/jpeg',.95),'JPEG',0,0,210,297)}
+for(let i=0;i<sh.length;i++){const c=await html2canvas(sh[i],{scale:4,useCORS:true,backgroundColor:'#ffffff'});if(i)P.addPage();P.addImage(c.toDataURL('image/jpeg',.95),'JPEG',0,0,210,297)}
 x.remove();await dl((k=='cv'?'CV':'Resume')+'-'+S.name.trim().replace(/\s+/g,'-')+'_'+new Date().getFullYear()+'.pdf',P.output('blob'))}
 catch(e){x.remove();msg('Gagal membuat PDF: '+(e&&e.message||e))}
 if(prev!=K){K=prev;draw()}}
