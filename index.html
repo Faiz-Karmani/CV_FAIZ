@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Generator CV & Resume</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6f9;--sf:#fff;--tx:#1d2330;--mu:#667085;--bd:#d6dbe4;--ac:#1e4a7a;--ac2:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171d;--sf:#1e222b;--tx:#e8eaef;--mu:#9aa2b4;--bd:#343a48;--ac:#7fb0e6;--ac2:#10151c}}
+:root[data-theme="dark"]{--bg:#14171d;--sf:#1e222b;--tx:#e8eaef;--mu:#9aa2b4;--bd:#343a48;--ac:#7fb0e6;--ac2:#10151c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+.app{display:flex;flex-wrap:wrap;gap:16px;padding:14px;max-width:1500px;margin:auto}
+.ed{flex:1 1 360px;max-width:520px}.pc{flex:2 1 400px;min-width:0}
+h1.t{font-size:18px;margin:0 0 10px}
+.tabs,.bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+button{font:inherit;padding:7px 12px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);color:var(--tx);cursor:pointer}
+button.on,button.pr{background:var(--ac);color:var(--ac2);border-color:var(--ac)}
+button.dg{color:#c0392b}
+label{display:block;margin:8px 0 2px;font-size:12px;color:var(--mu)}
+label.ck{display:flex;gap:6px;align-items:center;color:var(--tx);font-size:13px}
+input:not([type=checkbox]):not([type=file]),textarea{width:100%;box-sizing:border-box;padding:7px 9px;border:1px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--tx);font:inherit}
+textarea{min-height:64px;resize:vertical}
+.card{border:1px solid var(--bd);background:var(--sf);border-radius:10px;padding:4px 10px 10px;margin:10px 0}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:8px}
+.hint{font-size:12.5px;color:var(--mu);margin:6px 0}
+#ms{font-size:13px;color:var(--mu);min-height:18px;margin-bottom:6px}
+.pw{overflow:hidden;border:1px solid var(--bd);border-radius:8px;background:#9aa0aa}
+#pw{width:794px;transform-origin:0 0}
+.doc{width:794px}
+.sheet{width:794px;height:1122px;position:relative;overflow:hidden;background:#fff;color:#333;font:300 12.5px/1.5 Montserrat,Arial,sans-serif;padding:44px 40px 40px 86px;box-sizing:border-box;page-break-after:always;margin-bottom:10px;--a:#7f8383;--b:#1c3f6e;--c:#8ccbe0}
+.doc.rs .sheet{--a:#00b050;--b:#8fd0e0;--c:#e6f2e0}
+.gb{position:absolute;left:26px;top:30px;bottom:0;width:34px;background:#c0c0c0}
+.strip{position:absolute;left:14px;top:12px;width:34px;height:1030px;background:linear-gradient(var(--a),var(--b) 55%,var(--c))}
+.bd{position:relative}
+.hd{padding-right:185px;min-height:200px}
+.hd h1{font:300 34px/1.15 Montserrat,Arial,sans-serif;margin:0 0 6px;color:#222}
+.ph{position:absolute;right:0;top:-2px;width:160px;height:195px;object-fit:cover}
+.ct span{margin-right:26px}
+.rt{font:700 15px Arial,sans-serif;text-align:center;letter-spacing:1px;margin-bottom:4px}
+.sheet h2{font:700 17px Arial,sans-serif;margin:0 0 6px;padding-top:12px;color:#000}
+.it{padding-bottom:7px}.sm{font-size:11px;color:#555}
+.pi span{display:inline-block;width:150px}
+.sheet p{margin:0}
+</style></head><body>
+<div class="app">
+<div class="ed">
+<h1 class="t">Generator CV & Resume</h1>
+<div class="tabs" id="tabs"></div>
+<div id="pane"></div>
+</div>
+<div class="pc">
+<div class="bar">
+<button data-doc="cv">Lihat CV</button><button data-doc="rs">Lihat Resume</button>
+<button class="pr" data-pdf="cv">⬇ Unduh CV (PDF)</button><button class="pr" data-pdf="rs">⬇ Unduh Resume (PDF)</button>
+</div>
+<div id="ms"></div>
+<div class="pw" id="pwo"><div id="pw"><div id="pv"></div></div></div>
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+const $=s=>document.querySelector(s),esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),br=t=>esc(t).replace(/\n/g,'<br>');
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fm=m=>m?MN[+m.slice(5,7)-1]+' '+m.slice(0,4):'';
+function dur(s,e){if(!s)return'';const n=new Date(),a=s.split('-').map(Number),b=e?e.split('-').map(Number):[n.getFullYear(),n.getMonth()+1];const t=(b[0]-a[0])*12+b[1]-a[1]+1;if(t<1)return'';const y=Math.floor(t/12),m=t%12;return[y&&y+(y>1?' years':' year'),m&&m+(m>1?' months':' month')].filter(Boolean).join(' ')}
+const mk=(a,ks)=>a.map(r=>Object.fromEntries(ks.map((k,i)=>[k,r[i]])));
+const EK=['school','degree','start','end','res'],XK=['role','org','start','end','desc','res'];
+const D={name:'Faiz Karmani',tag:'Geospatial, Environmental, and Photogrammetry Practitioners.',addr:'Buniayu RT 02 / RW 01, Tambak, Banyumas, Central Java, Indonesia, 53196',email:'faizkarmani@gmail.com',phone:'+6282237963736',pob:'Banyumas, 10 Juli 1990',gender:'Male',marital:'Married',religion:'Islam',pi:true,photo:'',
+summary:'Geospatial, Environmental, and Photogrammetry Practitioners.',
+about:'Throughout my career, I have contributed to impacting business outcomes through effective organization, prioritization, and execution of key projects. Previously, in my Geospatial Analyst role, I exercised a calculated and methodical approach to problem solving. I am independently motivated, yet I appreciate team efforts and collaborate productively within groups.',
+skills:'Remote Sensing, Geomatics, 3D Modeling, Project Management, GNSS, Land Surveying, Photogrammetry, Cadastral Surveying, Project Planning',
+software:'Microsoft Word, Microsoft Excel, Microsoft PowerPoint, CorelDraw, Photoshop, AutoCAD Map, AutoCAD Civil 3D, ArcGIS, Global Mapper, Agisoft, Pix4D, Trimble Business Center, RTKLIB, Mission Planner, Blender, Bentley MicroStation, Google SketchUp, ENVI',
+equip:'Theodolite, Autolevel/Waterpass, Total Station, GNSS Receiver, Drone/UAV',
+patent:'ROAD CONDITION MONITORING DATA RECORDER\nPatent Application Number (at Dirjen HAKI Indonesia): S00202208255\nCoverage start date: 04 August 2022',
+edu:mk([['Universitas Gadjah Mada (UGM)',"Master's degree, Geomatics Engineering",'','',1],['Universitas Gadjah Mada (UGM)',"Bachelor's degree, Geodetic Engineering",'2008','2013',1],['SMA N 1 Purwokerto','Senior High School, Sains','2005','2008',1],['SMP N 1 Sumpiuh','Junior High School','2002','2005',1],['SD N 2 Buniayu','Elementary School','1998','2002',1],['SD N 2 Purwodadi','Elementary School','1996','1998',1]],EK),
+exp:mk([
+['Geospatial Expert','PT Blakasutha Hiperspektral Survey','2020-02','','Recent projects:\n- Stakeout and topographic mapping, Perumahan Saphire Townhouse Purbalingga, 2023\n- Foto Tegak PUNA for PTSL BPN: Kota Makassar, Enrekang, Pinrang, Kota Pare-Pare, Barru (SulSel), 2023\n- Mapping and monitoring of ricefield, Tambelang, Bekasi, 2022\n- Topographic and aerial photogrammetry mapping: Limpakuwus and Bobosan (2022), Al Irsyad Boarding School (2020)\n- UAV photogrammetry mapping, PT EMAS palm oil plantation, 2020\n- UAV photogrammetry training (Wisma MM UGM, 2021) and UAV VTOL training (PT EMAS, Samarinda, 2020)',1],
+['Cadaster Surveyor','KJSKB Wawan Junaedi dan Rekan','2022-01','','Coordinate the land surveyor team in measuring mass land certificates (10.000 land certificates) at PTSL from ATR/BPN project at Kabupaten Brebes, Dec 2022 - Mar 2023.',1],
+['Practitioner Lecturer','TSPD Vocational College UGM','2022-08','','Practitioner Lecturer of Photogrammetry.',1],
+['Geospatial Analyst','PT Lura Karya Sejahtera','2020-08','2021-01','Field team coordinator and spatial data management: HGU control data in Riau Province (ATR/BPN, Jakarta); validation of Buku Tanah and Surat Ukur, ex-Karisidenan Pekalongan.',1],
+['Cadaster Surveyor','ATR/BPN Kantah Purbalingga','2020-01','2020-04','Land surveyor (Cadaster) team measuring mass land certificates at PTSL, Kabupaten Purbalingga.',1],
+['Leader and Drone Pilot','Blakasutha Team','2016-01','2020-02','Aerial mapping, aerial photography, aerial monitoring using drone.',0],
+['Project Manager','KJSKB Febrian Bayu dan Rekan','2019-03','2019-09','Coordinate the land surveyor team measuring mass land certificates at PTSL from ATR/BPN project at Kabupaten Cilacap.',1],
+['Project Manager','PT Ripha Terrra Paramadina','2018-04','2018-09','Coordinate the land surveyor team measuring mass land certificates at PTSL from ATR/BPN project at Kabupaten Bogor.',1],
+['Co Founder','Lumenstolux','2014-09','2016-12','Industry of artistic lamp with applied new technology.',0],
+['Supervisor of Photogrammetry and GIS','PT Jelajah Survey Consultant','2013-05','2015-09','Ensure photogrammetric data processing is correct and timely; help resolve issues on photogrammetry concepts. 16 completed projects 2013-2015: UAV mapping of factories, Pelindo ports, coal mines, universities; terrestrial survey and UAV mapping of Pertamina pipeline; GIS of Pelindo Tanjung Perak.',1],
+['Assistant Lecturer','Geodetic Engineering, Gadjah Mada University','2011-07','2012-06','Assistant Lecturer of Photogrammetry.',1]],XK),
+lic:[{title:'Cadastral Surveyor License - ATR/BPN Ministry',note:'Issued Dec 2020 - Expires Dec 2025\n1-0625-18'}],
+hon:[{title:'3rd Winner 2017 Banyumas Regency KREANOVA Competition (innovation competition)',desc:'AVIPODES (a Village GIS application to compile Demographic Database and Aerial Map)\nBadan Perencanaan Wilayah Kabupaten Banyumas'},{title:'Winner 2021 Banyumas Regency KREANOVA Competition (innovation competition)',desc:'FOBOS ROADS (equipment to survey and record roads condition data)\nBadan Perencanaan Wilayah Kabupaten Banyumas'},{title:'Winner 2022 Province of Central Java KRENOVA Competition (innovation competition)',desc:'FOBOS ROADS (equipment to survey and record roads condition data)\nBadan Perencanaan Wilayah Province of Central Java'}]};
+for(const k in D){D[k]=Array.isArray(D[k])?[]:(typeof D[k]=='boolean'?D[k]:'')}
+let S=null;try{S=JSON.parse(localStorage.getItem('cvdata1'))}catch(e){}
+S=Object.assign(structuredClone(D),S||{});
+const save=()=>{try{localStorage.setItem('cvdata1',JSON.stringify(S))}catch(e){}};
+let K='cv',T='d';
+const msg=t=>{$('#ms').textContent=t||''};
+const sk=t=>esc(t).split(/[,\n•]+/).map(s=>s.trim()).filter(Boolean).join(' &nbsp;•&nbsp; ');
+const per=x=>((x.start||'')+' - '+(x.end||'Present')).replace(/^ - /,'');
+function blocks(k){const c=k=='cv',B=[];
+const sec=(t,a)=>a.forEach((x,i)=>B.push((i?'':'<h2>'+t+'</h2>')+'<div class="it">'+x+'</div>'));
+B.push((c?'':'<div class="rt">RESUME</div>')+'<div class="hd"><h1>'+esc(S.name)+'</h1>'+(c?'':'<div>'+esc(S.tag)+'</div>')+'<div>'+esc(S.addr)+'</div><div class="ct" style="margin-top:8px"><span>'+esc(S.email)+'</span><span>'+esc(S.phone)+'</span></div>'+(S.photo?'<img class="ph" src="'+S.photo+'">':'')+'</div>');
+if(c&&S.summary)sec('Summary',[br(S.summary)]);
+if(!c&&S.about)sec('About Me',['<div style="text-align:justify">'+br(S.about)+'</div>']);
+if(S.pi)sec('Personal Information',['<div class="pi">'+[['Place / Date of Birth','pob'],['Gender','gender'],['Marital Status','marital'],['Religion','religion']].filter(r=>S[r[1]]).map(r=>'<div><span>'+r[0]+'</span>: '+esc(S[r[1]])+'</div>').join('')+'</div>']);
+const ed=[...S.edu].sort((a,b)=>(b.end||'9999').localeCompare(a.end||'9999')||(b.start||'').localeCompare(a.start||''));
+if(c)sec('Education',ed.map(x=>'<b style="font-family:Arial">'+esc(x.school)+'</b><br>'+esc(x.degree)+'<br><span class="sm">'+esc(per(x))+'</span>'));
+else{const l=ed.filter(x=>x.res);if(l.length)sec('Education',[l.map(x=>'<div>'+esc(x.degree)+' &mdash; '+esc(x.school)+' <span class="sm">('+esc(per(x))+')</span></div>').join('')])}
+if(c)sec('Licenses & Certifications',S.lic.map(x=>'<b style="font-family:Arial">'+esc(x.title)+'</b><br><span class="sm">'+br(x.note)+'</span>'));
+if(S.skills.trim())sec('Skills',[sk(S.skills)]);
+if(c)sec('Honors and Reward',S.hon.map(x=>'<b style="font-family:Arial">'+esc(x.title)+'</b><br>'+br(x.desc)));
+if(c&&S.patent.trim())sec('Patent',[br(S.patent)]);
+const ex=[...S.exp].sort((a,b)=>(b.end||'9999').localeCompare(a.end||'9999')||(b.start||'').localeCompare(a.start||''));
+if(c)sec('Experience',ex.map(x=>{const d=dur(x.start,x.end);return'<b style="font-family:Arial">'+esc(x.role)+'</b><br>'+esc(x.org)+'<br><span class="sm">'+fm(x.start)+' - '+(x.end?fm(x.end):'Present')+(d?' ('+d+')':'')+'</span>'+(x.desc?'<div style="margin-top:3px">'+br(x.desc)+'</div>':'')}));
+else{const l=ex.filter(x=>x.res);if(l.length)sec('Experience',[l.map(x=>'<div><b style="font-family:Arial">'+esc(x.role)+'</b> at '+esc(x.org)+' <span class="sm">('+fm(x.start)+' - '+(x.end?fm(x.end):'Present')+')</span></div>').join('')])}
+if(S.software.trim())sec('Software Skills',[sk(S.software)]);
+if(S.equip.trim())sec('Survey Equipment Skills',[sk(S.equip)]);
+return B}
+const ns=doc=>{const s=document.createElement('div');s.className='sheet';s.innerHTML='<div class="gb"></div><div class="strip"></div><div class="bd"></div>';doc.appendChild(s);return s.lastChild};
+function draw(){const w=$('#pw'),pv=$('#pv');w.style.transform='none';pv.innerHTML='';const doc=document.createElement('div');doc.className='doc '+K;pv.appendChild(doc);let bd=ns(doc);
+blocks(K).forEach(b=>{const el=document.createElement('div');el.innerHTML=b;bd.appendChild(el);if(bd.offsetHeight>1038&&bd.children.length>1){bd.removeChild(el);bd=ns(doc);bd.appendChild(el)}});
+fit();document.querySelectorAll('[data-doc]').forEach(b=>b.classList.toggle('on',b.dataset.doc==K))}
+function fit(){const o=$('#pwo'),w=$('#pw'),s=Math.min(1,(o.clientWidth||794)/794);w.style.transform='scale('+s+')';o.style.height=Math.ceil(w.offsetHeight*s)+'px'}
+addEventListener('resize',fit);
+let tm;const later=()=>{clearTimeout(tm);tm=setTimeout(draw,150)};
+const F={d:[['name','Nama'],['tag','Judul singkat (di Resume)'],['addr','Alamat'],['email','Email'],['phone','Telepon'],['pob','Tempat / tanggal lahir'],['gender','Jenis kelamin'],['marital','Status perkawinan'],['religion','Agama']],
+r:[['summary','Summary (untuk CV)','ta'],['about','About Me (untuk Resume)','ta'],['skills','Skills (pisahkan dengan koma)','ta'],['software','Software (pisahkan dengan koma)','ta'],['equip','Peralatan survei (pisahkan dengan koma)','ta'],['patent','Paten','ta']]};
+const L={edu:[['school','Institusi'],['degree','Gelar / jenjang'],['start','Mulai (tahun)'],['end','Selesai (kosongkan = sekarang)']],
+exp:[['role','Posisi'],['org','Organisasi / perusahaan'],['start','Mulai','month'],['end','Selesai (kosongkan = sekarang)','month'],['desc','Uraian (hanya tampil di CV)','ta']],
+lic:[['title','Nama lisensi / sertifikat'],['note','Keterangan','ta']],hon:[['title','Judul penghargaan'],['desc','Keterangan','ta']]};
+const fld=(lab,v,ta,type,at)=>'<label>'+lab+(ta?'<textarea '+at+'>'+esc(v)+'</textarea>':'<input type="'+(type||'text')+'" value="'+esc(v)+'" '+at+'>')+'</label>';
+function list(n){const a=S[n];return '<button class="pr" data-add="'+n+'">+ Tambah</button>'+a.map((x,i)=>'<div class="card">'+L[n].map(f=>fld(f[0=='x'?0:1],x[f[0]],f[2]=='ta',f[2],'data-l="'+n+'" data-i="'+i+'" data-k="'+f[0]+'"')).join('')+'<div class="row">'+('res' in x?'<label class="ck"><input type="checkbox" data-l="'+n+'" data-i="'+i+'" data-k="res" '+(x.res?'checked':'')+'> Tampil di Resume</label>':'<span></span>')+'<button class="dg" data-del="'+n+'" data-i="'+i+'">Hapus</button></div></div>').join('')}
+function pane(){const tabs=[['d','Data diri'],['r','Ringkasan & keahlian'],['edu','Pendidikan'],['exp','Pengalaman'],['lh','Lisensi & penghargaan'],['bk','Cadangan']];
+$('#tabs').innerHTML=tabs.map(t=>'<button data-tab="'+t[0]+'" class="'+(T==t[0]?'on':'')+'">'+t[1]+'</button>').join('');let h='';
+if(T=='d')h=F.d.map(f=>fld(f[1],S[f[0]],0,0,'data-p="'+f[0]+'"')).join('')+'<label class="ck"><input type="checkbox" data-p="pi" '+(S.pi?'checked':'')+'> Tampilkan data pribadi (lahir, gender, status, agama)</label><label>Foto<input type="file" id="ph" accept="image/*"></label><div class="hint">Foto dikecilkan otomatis dan disimpan di browser ini.</div>';
+else if(T=='r')h=F.r.map(f=>fld(f[1],S[f[0]],1,0,'data-p="'+f[0]+'"')).join('');
+else if(T=='edu'||T=='exp')h=list(T);
+else if(T=='lh')h='<h3>Lisensi</h3>'+list('lic')+'<h3>Penghargaan</h3>'+list('hon');
+else h='<div class="hint">Data tersimpan otomatis di browser ini. Simpan cadangan (file .json) secara berkala agar aman kalau data browser terhapus, atau saat pindah perangkat.</div><div class="bar"><button class="pr" id="ex">⬇ Simpan cadangan (.json)</button><label class="ck" style="margin:0"><button id="im">Pulihkan dari cadangan</button></label></div><input type="file" id="imf" accept=".json" style="display:none"><button class="dg" id="rs">Kembalikan ke data awal</button>';
+$('#pane').innerHTML=h}
+document.addEventListener('input',e=>{const t=e.target,d=t.dataset,v=t.type=='checkbox'?t.checked:t.value;if(d.p)S[d.p]=v;else if(d.l)S[d.l][d.i][d.k]=v;else return;save();later()});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+if(d.tab){T=d.tab;pane()}
+else if(d.doc){K=d.doc;draw()}
+else if(d.add){const o={};L[d.add].forEach(f=>o[f[0]]='');if(d.add=='edu'||d.add=='exp')o.res=1;S[d.add].unshift(o);save();pane();draw()}
+else if(d.del){if(confirm('Hapus entri ini?')){S[d.del].splice(+d.i,1);save();pane();draw()}}
+else if(d.pdf)pdf(d.pdf)
+else if(b.id=='ex')dl('data-cv.json',JSON.stringify(S,null,1))
+else if(b.id=='im')$('#imf').click()
+else if(b.id=='rs'){if(confirm('Semua perubahan akan hilang. Lanjutkan?')){S=structuredClone(D);save();pane();draw()}}});
+document.addEventListener('change',e=>{const t=e.target,f=t.files&&t.files[0];if(!f)return;
+if(t.id=='ph'){const im=new Image();im.onload=()=>{const r=Math.min(1,480/im.height),c=document.createElement('canvas');c.width=im.width*r;c.height=im.height*r;c.getContext('2d').drawImage(im,0,0,c.width,c.height);S.photo=c.toDataURL('image/jpeg',.9);save();draw();msg('Foto terpasang.')};im.onerror=()=>msg('Foto tidak bisa dibaca, coba format JPG atau PNG.');const fr=new FileReader();fr.onload=()=>{im.src=fr.result};fr.readAsDataURL(f)}
+
+else if(t.id=='imf'){const r=new FileReader();r.onload=()=>{try{S=Object.assign(structuredClone(D),JSON.parse(r.result));save();pane();draw();msg('Cadangan berhasil dipulihkan.')}catch(x){msg('File cadangan tidak valid.')}};r.readAsText(f)}});
+async function dl(name,data){try{const bl=data instanceof Blob?data:new Blob([data],{type:'application/json'});const u=URL.createObjectURL(bl),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);msg('Berkas diunduh: '+name);return true}catch(e){msg('Gagal mengunduh: '+(e&&e.message||e));return false}}
+async function pdf(k){if(!window.jspdf||!window.html2canvas){msg('Pustaka PDF belum termuat, coba lagi sebentar lagi.');return}
+const prev=K;K=k;draw();msg('Membuat PDF...');await document.fonts.ready;
+const x=document.createElement('div');x.style.cssText='position:absolute;left:0;top:0;width:794px;z-index:-1;pointer-events:none';x.innerHTML='<style>.sheet{margin:0!important}</style>';x.appendChild($('.doc').cloneNode(true));document.body.appendChild(x);
+try{const P=new jspdf.jsPDF({unit:'mm',format:'a4'}),sh=x.querySelectorAll('.sheet');
+for(let i=0;i<sh.length;i++){const c=await html2canvas(sh[i],{scale:2,useCORS:true,backgroundColor:'#ffffff'});if(i)P.addPage();P.addImage(c.toDataURL('image/jpeg',.95),'JPEG',0,0,210,297)}
+x.remove();await dl((k=='cv'?'CV':'Resume')+'-'+S.name.trim().replace(/\s+/g,'-')+'_'+new Date().getFullYear()+'.pdf',P.output('blob'))}
+catch(e){x.remove();msg('Gagal membuat PDF: '+(e&&e.message||e))}
+if(prev!=K){K=prev;draw()}}
+pane();draw();document.fonts&&document.fonts.ready.then(draw);
+</script></body></html>
